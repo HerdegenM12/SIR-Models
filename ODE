@@ -1,6 +1,6 @@
 %MATLAB CODE SIR ODE MODEL%
 %------------------------------------------------------------------------------%
-clc; clear; clf;
+clc; clear; clear all;
 
 % Function definitions for RK4 system of ODEs
 sir_model = @(t, y, b, g, N) [
