@@ -1,4 +1,5 @@
 %MATLAB CODE SIR ODE MODEL%
+%------------------------------------------------------------------------------%
 clc; clear; clf;
 
 % Function definitions for RK4 system of ODEs
