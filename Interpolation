@@ -1,0 +1,87 @@
+%SIR Interpolation
+clc; clear; close all;
+
+% Function definitions for RK4 system of ODEs
+sir_model = @(t, y, beta, gamma, N) [
+    -(beta / N) * y(1) * y(2);
+    (beta / N) * y(1) * y(2) - gamma * y(2); 
+    gamma * y(2)                             
+];
+
+% Parameters and initial conditions(Values are place holders)
+N = 1000;
+S0 = 999;
+I0 = 1;
+R0 = 0;
+y0 = [S0; I0; R0];     % Initial conditions vector
+
+t_final = 200;         % Simulation time (days)
+dt_fine = 0.1;         % Fine time step
+dt_coarse = 1.0;       % Coarser time step
+
+% Parameters
+b = 0.3;
+g = 0.1; 
+
+% Function to run simulation
+run_RK4 = @(dt) RK4_Simulation(sir_model, y0, b, g, N, t_final, dt);
+
+% Fine step simulation
+[time_fine, results_fine] = run_RK4(dt_fine);
+
+% Coarse step simulation
+[time_coarse, results_coarse] = run_RK4(dt_coarse);
+
+% Interpolate coarse results onto the fine time grid
+results_interp = interp1(time_coarse, results_coarse', time_fine, 'linear')';
+
+% Calculate errors
+errors = abs(results_fine - results_interp); % Element-wise absolute error
+rmse = sqrt(mean(errors.^2, 2)); % RMSE for each compartment
+
+% Plot fine vs. interpolated dynamics
+compartments = {'Susceptible', 'Infected', 'Recovered'};
+figure;
+for i = 1:3
+    subplot(3, 1, i);
+    plot(time_fine, results_fine(i, :), 'b', 'LineWidth', 2); hold on;
+    plot(time_fine, results_interp(i, :), 'r--', 'LineWidth', 2);
+    title(sprintf('%s Dynamics (Fine vs. Interpolated)', compartments{i}));
+    legend('Fine', 'Interpolated');
+    xlabel('Time (days)');
+    ylabel('Population');
+    grid on;
+end
+
+% Plot errors
+figure;
+plot(time_fine, errors', 'LineWidth', 2);
+title('Errors Between Fine and Interpolated Dynamics');
+legend('Susceptible', 'Infected', 'Recovered');
+xlabel('Time (days)');
+ylabel('Absolute Error');
+grid on;
+
+% Display RMSE
+disp('Root Mean Square Errors (RMSE):');
+disp(table(compartments', rmse, 'VariableNames', {'Type', 'RMSE'}));
+
+% Function to simulate SIR model using RK4
+function [time, results] = RK4_Simulation(sir_model, y0, beta, gamma, N, t_final, dt)
+    time = 0:dt:t_final;
+    num_steps = length(time);
+    results = zeros(3, num_steps);
+    results(:, 1) = y0;
+    
+    for i = 1:num_steps-1
+        t = time(i);
+        y = results(:, i);
+        
+        k1 = sir_model(t, y, beta, gamma, N);
+        k2 = sir_model(t + dt/2, y + dt*k1/2, beta, gamma, N);
+        k3 = sir_model(t + dt/2, y + dt*k2/2, beta, gamma, N);
+        k4 = sir_model(t + dt, y + dt*k3, beta, gamma, N);
+        
+        results(:, i+1) = y + (dt/6) * (k1 + 2*k2 + 2*k3 + k4);
+    end
+end
