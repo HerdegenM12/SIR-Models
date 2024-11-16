@@ -1,4 +1,4 @@
-%MATLAB CODE SIR ODE MODEL%
+ %MATLAB CODE SIR ODE MODEL%
 %------------------------------------------------------------------------------%
 clc; clear; clear all;
 
@@ -8,7 +8,7 @@ sir_model = @(t, y, b, g, N) [
 (b / N) * y(1) * y(2) - g * y(2);
 g * y(2)];
 
-% Parameters and initial conditions (1=TBD)
+% Parameters and initial conditions (Real values TBD)
 N = 10000;
 S0 = 9999;
 I0 = 1; 
