@@ -3,10 +3,10 @@
 clc; clear; close all;
 
 % Function definitions for RK4 system of ODEs
-sir_model = @(t, y, beta, gamma, N) [
-    -(beta / N) * y(1) * y(2);
-    (beta / N) * y(1) * y(2) - gamma * y(2); 
-    gamma * y(2)                             
+sir_model = @(t, y, b, g, N) [
+    -(b / N) * y(1) * y(2);
+    (b / N) * y(1) * y(2) - g * y(2); 
+    g * y(2)                             
 ];
 
 % Parameters and initial conditions(Values are place holders)
@@ -79,9 +79,9 @@ function [time, results] = RK4_Simulation(sir_model, y0, beta, gamma, N, t_final
         y = results(:, i);
         
         k1 = sir_model(t, y, beta, gamma, N);
-        k2 = sir_model(t + dt/2, y + dt*k1/2, beta, gamma, N);
-        k3 = sir_model(t + dt/2, y + dt*k2/2, beta, gamma, N);
-        k4 = sir_model(t + dt, y + dt*k3, beta, gamma, N);
+        k2 = sir_model(t + dt/2, y + dt*k1/2, b, g, N);
+        k3 = sir_model(t + dt/2, y + dt*k2/2, b, g, N);
+        k4 = sir_model(t + dt, y + dt*k3, b, g, N);
         
         results(:, i+1) = y + (dt/6) * (k1 + 2*k2 + 2*k3 + k4);
     end
