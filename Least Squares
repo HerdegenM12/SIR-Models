@@ -90,3 +90,5 @@ ylabel('ln(I(t))');
 title('Least Squares Fit of ln(I(t))');
 legend('Location', 'Best');
 grid on;
+
+%The estimates of I(0) and β do not improve with only 10 days of data compared to 30 days because the shorter dataset provides less information, making the fit more sensitive to noise and deviations from the assumption that S(t) remains constant. Longer datasets better capture the dynamics of the epidemic, leading to more accurate parameter estimates.
