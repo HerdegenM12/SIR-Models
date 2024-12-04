@@ -1,6 +1,6 @@
  %MATLAB CODE SIR ODE MODEL%
 %------------------------------------------------------------------------------%
-clc; clear; clear all;
+clc; clear; close all;
 
 % Function definitions for RK4 system of ODEs
 sir_model = @(t, y, b, g, N) [
@@ -8,21 +8,21 @@ sir_model = @(t, y, b, g, N) [
 (b / N) * y(1) * y(2) - g * y(2);
 g * y(2)];
 
-% Parameters and initial conditions (Real values TBD)
-N = 10000;
-S0 = 9999;
-I0 = 1; 
-R0 = 0;                
+% Parameters and initial conditions
+S0 = 990;
+I0 = 10; 
+R0 = 0;
+N = S0 + I0 + R0;
 y0 = [S0; I0; R0];
 
-t_final = 200;         % Simulation time (days)
-dt = 0.1;              % Time step
+t_final = 100;         % Simulation time (days)
+dt = 1;              % Time step
 
 % Define parameter sets (beta, gamma) Current vaues are test values
 parameters = [
     0.3, 0.1;
-    0.5, 0.2; 
-    0.1, 0.05  
+    1, 0.1; 
+    2, 0.2  
 ];
 
 % Loop through parameter sets
