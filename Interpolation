@@ -17,8 +17,7 @@ R0 = 0;
 y0 = [S0; I0; R0];     % Initial conditions vector
 
 t_final = 100;         % Simulation time (days)
-dt_fine = 0.1;         % Fine time step
-dt_coarse = 1.0;       % Coarser time step
+dt_coarse = 2;       % Coarser time step
 
 % Parameters
 b = 0.3;
