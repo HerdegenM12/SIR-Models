@@ -9,14 +9,14 @@ sir_model = @(t, y, b, g, N) [
     g * y(2)                             
 ];
 
-% Parameters and initial conditions(Values are place holders)
+% Parameters and initial conditions
 N = 1000;
-S0 = 999;
-I0 = 1;
+S0 = 990;
+I0 = 10;
 R0 = 0;
 y0 = [S0; I0; R0];     % Initial conditions vector
 
-t_final = 200;         % Simulation time (days)
+t_final = 100;         % Simulation time (days)
 dt_fine = 0.1;         % Fine time step
 dt_coarse = 1.0;       % Coarser time step
 
