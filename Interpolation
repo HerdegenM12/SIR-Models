@@ -1,23 +1,24 @@
 %MATLAB SIR Interpolation CODE%
 %------------------------------------------------------------------------------%
-clc; clear; close all;
+clc; clear all;
 
 % Function definitions for RK4 system of ODEs
-sir_model = @(t, y, b, g, N) [
-    -(b / N) * y(1) * y(2);
-    (b / N) * y(1) * y(2) - g * y(2); 
-    g * y(2)                             
+sir_model = @(t, y, beta, gamma, N) [
+    -(beta / N) * y(1) * y(2);
+    (beta / N) * y(1) * y(2) - gamma * y(2); 
+    gamma * y(2)                             
 ];
 
-% Parameters and initial conditions
-N = 1000;
+% Parameters and initial conditions (Values are placeholders)
 S0 = 990;
 I0 = 10;
 R0 = 0;
+N = S0 + I0 + R0;
 y0 = [S0; I0; R0];     % Initial conditions vector
 
-t_final = 100;         % Simulation time (days)
-dt_coarse = 2;       % Coarser time step
+t_final = 200;         % Simulation time (days)
+dt_fine = 0.1;         % Fine time step
+dt_coarse = 1.0;       % Coarser time step
 
 % Parameters
 b = 0.3;
@@ -32,39 +33,48 @@ run_RK4 = @(dt) RK4_Simulation(sir_model, y0, b, g, N, t_final, dt);
 % Coarse step simulation
 [time_coarse, results_coarse] = run_RK4(dt_coarse);
 
-% Interpolate coarse results onto the fine time grid
-results_interp = interp1(time_coarse, results_coarse', time_fine, 'linear')';
+% Linear interpolation
+results_interp_linear = interp1(time_coarse, results_coarse', time_fine, 'linear')';
 
-% Calculate errors
-errors = abs(results_fine - results_interp); % Element-wise absolute error
-rmse = sqrt(mean(errors.^2, 2)); % RMSE for each compartment
+% Quadratic interpolation
+results_interp_quadratic = interp1(time_coarse, results_coarse', time_fine, 'pchip')';
 
-% Plot fine vs. interpolated dynamics
+% Calculate errors for linear interpolation
+errors_linear = abs(results_fine - results_interp_linear); % Element-wise absolute error
+rmse_linear = sqrt(mean(errors_linear.^2, 2)); % RMSE for each compartment
+
+% Calculate errors for quadratic interpolation
+errors_quadratic = abs(results_fine - results_interp_quadratic); % Element-wise absolute error
+rmse_quadratic = sqrt(mean(errors_quadratic.^2, 2)); % RMSE for each compartment
+
+% Plot fine vs. interpolated dynamics (Linear and Quadratic)
 compartments = {'Susceptible', 'Infected', 'Recovered'};
 figure;
 for i = 1:3
     subplot(3, 1, i);
     plot(time_fine, results_fine(i, :), 'b', 'LineWidth', 2); hold on;
-    plot(time_fine, results_interp(i, :), 'r--', 'LineWidth', 2);
+    plot(time_fine, results_interp_linear(i, :), 'r--', 'LineWidth', 2);
+    plot(time_fine, results_interp_quadratic(i, :), 'g-.', 'LineWidth', 2);
     title(sprintf('%s Dynamics (Fine vs. Interpolated)', compartments{i}));
-    legend('Fine', 'Interpolated');
+    legend('Fine', 'Linear Interpolated', 'Quadratic Interpolated');
     xlabel('Time (days)');
     ylabel('Population');
     grid on;
 end
 
-% Plot errors
+% Plot errors (Linear and Quadratic)
 figure;
-plot(time_fine, errors', 'LineWidth', 2);
+plot(time_fine, errors_linear', 'r--', 'LineWidth', 2); hold on;
+plot(time_fine, errors_quadratic', 'g-.', 'LineWidth', 2);
 title('Errors Between Fine and Interpolated Dynamics');
-legend('Susceptible', 'Infected', 'Recovered');
+legend('Linear Interpolation', 'Quadratic Interpolation');
 xlabel('Time (days)');
 ylabel('Absolute Error');
 grid on;
 
-% Display RMSE
+% Display RMSE for both interpolation methods
 disp('Root Mean Square Errors (RMSE):');
-disp(table(compartments', rmse, 'VariableNames', {'Type', 'RMSE'}));
+disp(table(compartments', rmse_linear, rmse_quadratic, 'VariableNames', {'Type', 'RMSE_Linear', 'RMSE_Quadratic'}))
 
 % Function to simulate SIR model using RK4
 function [time, results] = RK4_Simulation(sir_model, y0, beta, gamma, N, t_final, dt)
@@ -78,9 +88,9 @@ function [time, results] = RK4_Simulation(sir_model, y0, beta, gamma, N, t_final
         y = results(:, i);
         
         k1 = sir_model(t, y, beta, gamma, N);
-        k2 = sir_model(t + dt/2, y + dt*k1/2, b, g, N);
-        k3 = sir_model(t + dt/2, y + dt*k2/2, b, g, N);
-        k4 = sir_model(t + dt, y + dt*k3, b, g, N);
+        k2 = sir_model(t + dt/2, y + dt*k1/2, beta, gamma, N);
+        k3 = sir_model(t + dt/2, y + dt*k2/2, beta, gamma, N);
+        k4 = sir_model(t + dt, y + dt*k3, beta, gamma, N);
         
         results(:, i+1) = y + (dt/6) * (k1 + 2*k2 + 2*k3 + k4);
     end
