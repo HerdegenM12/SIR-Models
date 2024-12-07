@@ -1,5 +1,4 @@
- %MATLAB CODE SIR ODE MODEL%
-%------------------------------------------------------------------------------%
+%PART I: Modeling disease spread using SIR mode
 clc; clear all;
 
 % Function definitions for RK4 system of ODEs
