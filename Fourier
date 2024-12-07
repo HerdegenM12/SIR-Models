@@ -1,23 +1,10 @@
- %MATLAB Code Fourier Transformations%
+%MATLAB Code Fourier Transformations%
 %------------------------------------------------------------------------------%
 clc; clear all;
 
-% Define parameter set (w)
-
-% Function definitions for RK4 system of ODEs and Beta
-B0 = 0.3;
-w1 = 2*pi*365/365;
-w2 = 2*pi*100/365;
-A = 5;
-
-%1
-B = @(t) B0*(1+A*sin(w1*t));
-sir_model = @(t, y, g, N) [
--(B(t) / N) * y(1) * y(2);
-(B(t) / N) * y(1) * y(2) - g * y(2);
-g * y(2)];
-
 % Parameters and initial conditions
+B0 = 0.3;
+A = 5;
 S0 = 990;
 I0 = 10; 
 R0 = 0;
@@ -36,6 +23,22 @@ num_steps = length(time);
 results = zeros(3, num_steps);
 results(:, 1) = y0;  % Initial conditions
 
+% Define parameter set (w)
+parameter = [
+    2*pi*365/365;
+    2*pi*100/365  
+];
+
+% Loop through parameter sets
+for param_idx = 1:size(parameter, 1)
+    w = parameter(param_idx, 1);
+
+    % Function definitions for RK4 system of ODEs and Beta
+    B = @(t) B0*(1+A*sin(w*t));
+    sir_model = @(t, y, g, N) [
+    -(B(t) / N) * y(1) * y(2);
+    (B(t) / N) * y(1) * y(2) - g * y(2);
+    g * y(2)];
 
     % RK4 Integration
     for i = 1:num_steps-1
@@ -61,7 +64,7 @@ results(:, 1) = y0;  % Initial conditions
     plot(time, S, 'b', 'LineWidth', 2); hold on;
     plot(time, I, 'r', 'LineWidth', 2);
     plot(time, R, 'g', 'LineWidth', 2);
-    title(sprintf('SIR Model (w = %.2f)', w1));
+    title(sprintf('SIR Model (w = %.2f)', w));
     xlabel('Time (days)');
     ylabel('Population');
     legend('Susceptible', 'Infected', 'Recovered');
@@ -74,75 +77,13 @@ results(:, 1) = y0;  % Initial conditions
     Rfft = fft(R);
     
     % Define frequency range
-    N = num_steps-1;
-    f = (0:(N/2))/T;
+    n = num_steps-1;
+    f = (0:(n/2))/T;
 
     % Calculate spectrum
     spectrum=Ifft;
-    P2 = abs(spectrum/N);
-    P1 = P2(1:N/2+1);
-    P1(2:end-1) = 2*P1(2:end-1);
-
-    % Plot spectrum
-    figure;
-    plot(f,P1); hold on;
-    title(sprintf('Spectrum for Infected Cases (w = %.2f)', w1));
-    xlabel('Frequency (f)');
-    ylabel('Abs Val of Fourier Coefficients');
-    grid on;
-    hold off;
-
-%2
-B = @(t) B0*(1+A*sin(w2*t));
-sir_model = @(t, y, g, N) [
--(B(t) / N) * y(1) * y(2);
-(B(t) / N) * y(1) * y(2) - g * y(2);
-g * y(2)];
-
-    % RK4 Integration
-    for i = 1:num_steps-1
-        t = time(i);
-        y = results(:, i);
-        
-        % RK4 steps
-        k1 = sir_model(t, y, g, N);
-        k2 = sir_model(t + h/2, y + h*k1/2, g, N);
-        k3 = sir_model(t + h/2, y + h*k2/2, g, N);
-        k4 = sir_model(t + h, y + h*k3, g, N);
-    
-        results(:, i+1) = y + (h/6) * (k1 + 2*k2 + 2*k3 + k4);
-    end
-        
-    % Extract results
-    S = results(1, :);
-    I = results(2, :);
-    R = results(3, :);
-    
-    % Plot results
-    figure;
-    plot(time, S, 'b', 'LineWidth', 2); hold on;
-    plot(time, I, 'r', 'LineWidth', 2);
-    plot(time, R, 'g', 'LineWidth', 2);
-    title(sprintf('SIR Model (w = %.2f)', w2));
-    xlabel('Time (days)');
-    ylabel('Population');
-    legend('Susceptible', 'Infected', 'Recovered');
-    grid on;
-    hold off;
-    
-    % Create FFT of results
-    Sfft = fft(S);
-    Ifft = fft(I);
-    Rfft = fft(R);
-    
-    % Define frequency range
-    N = num_steps-1;
-    f = (0:(N/2))/T;
-
-    % Calculate spectrum
-    spectrum=Ifft;
-    P2 = abs(spectrum/N);
-    P1 = P2(1:N/2+1);
+    P2 = abs(spectrum/n);
+    P1 = P2(1:n/2+1);
     P1(2:end-1) = 2*P1(2:end-1);
 
     % Plot spectrum
@@ -153,3 +94,4 @@ g * y(2)];
     ylabel('Abs Val of Fourier Coefficients');
     grid on;
     hold off;
+end
