@@ -5,50 +5,40 @@ clc; clear all;
 sir_model = @(t, y, beta, gamma, N) [
     -(beta / N) * y(1) * y(2);
     (beta / N) * y(1) * y(2) - gamma * y(2); 
-    gamma * y(2)                             
-];
+    gamma * y(2)
+    ];
 
-% Parameters and initial conditions (Values are placeholders)
+% Parameters and initial conditions
 S0 = 990;
 I0 = 10;
 R0 = 0;
 N = S0 + I0 + R0;
-y0 = [S0; I0; R0];     % Initial conditions vector
-
-t_final = 200;         % Simulation time (days)
-dt_fine = 0.1;         % Fine time step
-dt_coarse = 1.0;       % Coarser time step
-
-% Parameters
+y0 = [S0; I0; R0];
+t_final = 200;
+dt_fine = 0.1;
+dt_coarse = 1.0;
 b = 0.3;
 g = 0.1; 
 
-% Function to run simulation
 run_RK4 = @(dt) RK4_Simulation(sir_model, y0, b, g, N, t_final, dt);
 
-% Fine step simulation
+% Time simulations
 [time_fine, results_fine] = run_RK4(dt_fine);
-
-% Coarse step simulation
 [time_coarse, results_coarse] = run_RK4(dt_coarse);
 
-% Linear interpolation
+% Interpolations
 results_interp_linear = interp1(time_coarse, results_coarse', time_fine, 'linear')';
-
-% Quadratic interpolation
 results_interp_quadratic = interp1(time_coarse, results_coarse', time_fine, 'pchip')';
 
-% Calculate errors for linear interpolation
-errors_linear = abs(results_fine - results_interp_linear); % Element-wise absolute error
-rmse_linear = sqrt(mean(errors_linear.^2, 2)); % RMSE for each compartment
+% Calculate errors
+errors_linear = abs(results_fine - results_interp_linear);
+rmse_linear = sqrt(mean(errors_linear.^2, 2));
+errors_quadratic = abs(results_fine - results_interp_quadratic);
+rmse_quadratic = sqrt(mean(errors_quadratic.^2, 2));
 
-% Calculate errors for quadratic interpolation
-errors_quadratic = abs(results_fine - results_interp_quadratic); % Element-wise absolute error
-rmse_quadratic = sqrt(mean(errors_quadratic.^2, 2)); % RMSE for each compartment
-
-% Plot fine vs. interpolated dynamics (Linear and Quadratic)
+% Plot Interpolations
 compartments = {'Susceptible', 'Infected', 'Recovered'};
-figure;
+figure(1);
 for i = 1:3
     subplot(3, 1, i);
     plot(time_fine, results_fine(i, :), 'b', 'LineWidth', 2); hold on;
@@ -61,8 +51,8 @@ for i = 1:3
     grid on;
 end
 
-% Plot errors (Linear and Quadratic)
-figure;
+% Plot Errors
+figure(2);
 plot(time_fine, errors_linear', 'r--', 'LineWidth', 2); hold on;
 plot(time_fine, errors_quadratic', 'g-.', 'LineWidth', 2);
 title('Errors Between Fine and Interpolated Dynamics');
@@ -71,11 +61,10 @@ xlabel('Time (days)');
 ylabel('Absolute Error');
 grid on;
 
-% Display RMSE for both interpolation methods
 disp('Root Mean Square Errors (RMSE):');
 disp(table(compartments', rmse_linear, rmse_quadratic, 'VariableNames', {'Type', 'RMSE_Linear', 'RMSE_Quadratic'}))
 
-% Function to simulate SIR model using RK4
+% SIR model using RK4
 function [time, results] = RK4_Simulation(sir_model, y0, beta, gamma, N, t_final, dt)
     time = 0:dt:t_final;
     num_steps = length(time);
