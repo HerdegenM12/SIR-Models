@@ -1,5 +1,4 @@
-%MATLAB Code Fourier Transformations%
-%------------------------------------------------------------------------------%
+%Part IV: Fourier Analysis
 clc; clear all;
 
 % Parameters and initial conditions
