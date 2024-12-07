@@ -37,7 +37,7 @@ I_true = results(2, :);
 t_fit = time;
 ln_I = log(I_true);
 
-% Fit using linear least squares: ln(I(t)) = ln(I(0)) + k * t
+% Fit using linear least squares
 A = [ones(length(t_fit), 1), t_fit'];
 b = ln_I';
 x = A \ b;
@@ -60,14 +60,13 @@ x_10 = A_10 \ b_10;
 ln_I0_est_10 = x_10(1);
 k_est_10 = x_10(2);
 
-% I(0) and for 10 days
+% I(0) and b for 10 days
 I0_est_10 = exp(ln_I0_est_10);
 beta_est_10 = (k_est_10 + gamma) * N / S_0;
 fprintf('\nUsing 10 days of data:\n');
 fprintf('Estimated I(0): %.2f (True: %.2f)\n', I0_est_10, I_0);
 fprintf('Estimated beta: %.4f (True: %.4f)\n', beta_est_10, beta);
 
-% Plotting results
 figure(1);
 plot(t_fit, ln_I, 'ro-', 'LineWidth', 1.5, 'DisplayName', 'True ln(I(t))');
 hold on;
