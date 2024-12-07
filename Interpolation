@@ -1,5 +1,4 @@
-%MATLAB SIR Interpolation CODE%
-%------------------------------------------------------------------------------%
+% Part II: Interpolation
 clc; clear all;
 
 % Function definitions for RK4 system of ODEs
